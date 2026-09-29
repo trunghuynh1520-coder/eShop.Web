@@ -1,0 +1,72 @@
+﻿@page "/placeorder"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject NavigationManager navigationManager
+@inject IViewShoppingCartUseCase viewShoppingCartUseCase
+@inject IPlaceOrderUseCase PlaceOrderUseCase
+
+<h3>Placing Order</h3>
+<br />
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+	<div class="alert alert-danger my-2">@errorMessage</div>
+}
+
+@if (order != null)
+{
+	<div class="row">
+		<div class="col">
+			<CustomerFormComponent OnCustomerInfoSubmitted="HandleCustomerInfoSubmitted" />
+		</div>
+		<div class="col">
+			<OrderSummaryComponent order="order" HidePlaceOrder="true" />
+		</div>
+	</div>
+}
+
+@code {
+	private string errorMessage;
+	private Order order;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			order = await viewShoppingCartUseCase.Execute();
+			StateHasChanged();
+		}
+	}
+
+	private async Task HandleCustomerInfoSubmitted(CustomerViewModel customer)
+	{
+		errorMessage = string.Empty;
+
+		try
+		{
+			var mapper = new AutoMapper.MapperConfiguration(
+				cfg => cfg.CreateMap<CustomerViewModel, Order>(),
+				Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance
+			).CreateMapper();
+
+			mapper.Map<CustomerViewModel, Order>(customer, order);
+
+			var orderUniqueId = await PlaceOrderUseCase.Execute(order);
+
+			if (string.IsNullOrEmpty(orderUniqueId))
+			{
+				errorMessage = "Không thể tạo đơn hàng! Vui lòng kiểm tra lại thông tin nhập vào hoặc giỏ hàng.";
+			}
+			else
+			{
+				navigationManager.NavigateTo($"/orderconfirm/{orderUniqueId}");
+			}
+		}
+		catch (Exception ex)
+		{
+			errorMessage = $"Lỗi xử lý: {ex.Message}";
+		}
+
+		StateHasChanged();
+	}
+}

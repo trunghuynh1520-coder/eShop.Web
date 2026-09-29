@@ -1,0 +1,67 @@
+﻿@page "/cart"
+@using eShop.UseCases.ShoppingCartScreen.interfaces
+@using eShop.UseCases.PluginInterface.StateStore
+@using Microsoft.AspNetCore.Components.Web
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject IViewShoppingCartUseCase ViewShoppingCartUseCase
+@inject ISshoppingCartStateStore shoppingCartStateStore
+
+<h3>Shopping Cart</h3>
+
+<br />
+@if (order != null && order.LineItems != null && order.LineItems.Count > 0)
+{
+    <div class="row">
+        <div class="col-6">
+            <ul class="list-unstyled">
+                @for (int i = 0; i < order.LineItems.Count; i++)
+                {
+                    <LineItemComponent LineItem="order.LineItems[i]"
+                                       OnDeleteProduct="HandleDeleteProduct"
+                                       OnUpdateQuantity="HandleUpdateQuantity"></LineItemComponent>
+
+                    @if (i < order.LineItems.Count - 1)
+                    {
+                        <li style="list-style:none">
+                            <hr />
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="col">
+            <OrderSummaryComponent order="order" />
+        </div>
+    </div>
+}
+else
+{
+    <p>Giỏ hàng hiện tại đang trống hoặc đang tải...</p>
+}
+
+@code {
+    private Order order;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            order = await ViewShoppingCartUseCase.Execute();
+            StateHasChanged();
+        }
+    }
+
+    private void HandleDeleteProduct(Order order)
+    {
+        this.order = order;
+        // Bỏ tín hiệu cập nhật số lượng trên TopNavBar
+        shoppingCartStateStore.UpdateLineItemsCount();
+    }
+
+    private void HandleUpdateQuantity(Order order)
+    {
+        this.order = order;
+        shoppingCartStateStore.UpdateLineItemsCount();
+    }
+}

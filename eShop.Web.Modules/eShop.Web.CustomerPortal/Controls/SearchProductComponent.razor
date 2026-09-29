@@ -1,0 +1,37 @@
+﻿
+@page "/products"
+
+@using Microsoft.AspNetCore.Components.Web
+@using eShop.CoreBusiness.Models
+@using eShop.Web.Common.Controls
+@using eShop.Web.CustomerPortal.Pages
+@using eShop.UseCases.SearchProductScreen
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject ISearchProductUseCase searchProduct
+
+<!-- Thay thế cho thẻ <table> cũ -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-2">
+    @if (products != null && products.Any())
+    {
+        @foreach (var product in products)
+        {
+            <div class="col">
+                <ProductItemComponent product="product" />
+            </div>
+        }
+    }
+</div>
+@code {
+    private IEnumerable<Product> products;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        products = searchProduct.Execute();
+    }
+
+    private void HandleSearch(string filter)
+    {
+        products = searchProduct.Execute(filter);
+    }
+}

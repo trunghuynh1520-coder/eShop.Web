@@ -1,0 +1,84 @@
+@page "/products/{id:int}"
+
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Routing
+@using eShop.UseCases.ViewProductScreen
+@using eShop.UseCases.SearchProductScreen
+@using eShop.CoreBusiness.Models
+
+
+@inject NavigationManager navigationManager
+@inject IViewProductUseCase viewProduct
+@inject IAddProductToCartUseCase addProductToCartUseCase
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IViewProductUseCase viewProduct
+<div class="container mt-5">
+    @if (product != null)
+    {
+        <div class="card shadow border-0 rounded-4 overflow-hidden" style="max-width: 800px; margin: auto;">
+            <div class="row g-0">
+                <div class="col-md-5 bg-white d-flex align-items-center justify-content-center p-4 border-end">
+                    <img src="@product.ImageLink" class="img-fluid rounded" alt="@product.Name" style="max-height: 350px; object-fit: contain;" />
+                </div>
+                <div class="col-md-7 bg-light">
+                    <div class="card-body p-5 h-100 d-flex flex-column">
+                        <div class="mb-2">
+                            <span class="badge bg-secondary text-uppercase px-3 py-2">@product.Brand</span>
+                        </div>
+                        <h2 class="card-title fw-bold text-dark mb-3">@product.Name</h2>
+                        
+                        <hr class="text-muted opacity-25" />
+                        
+                        <div class="flex-grow-1 mb-4 mt-3">
+                            <h6 class="text-muted text-uppercase fw-bold mb-2" style="font-size: 0.85rem; letter-spacing: 1px;">Description</h6>
+                            <p class="text-secondary lh-lg" style="font-size: 1.05rem;">@product.Description</p>
+                        </div>
+                        
+                        <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
+                            <div>
+                                <span class="text-muted d-block small fw-bold text-uppercase mb-1" style="letter-spacing: 1px;">Price</span>
+                                <span class="fs-2 fw-bolder text-danger">@product.Price.ToString("C")</span>
+                            </div>
+                            <NavLink class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm fw-bold" href="products">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Catalog
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 400px;">
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="text-muted">Loading product details...</h5>
+            </div>
+        </div>
+    }
+    <button class="btn btn-primary" @onclick="AddToCart">Add To Cart</button>
+</div>
+
+@code {
+    private Product product;
+    
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Id > 0)
+        {
+            product = viewProduct.Execute(Id);
+        }
+    }
+    private void AddToCart()
+    {
+        addProductToCartUseCase.Execute(product.Id);
+        navigationManager.NavigateTo("/cart");
+    }
+}
