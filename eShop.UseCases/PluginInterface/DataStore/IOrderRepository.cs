@@ -1,4 +1,4 @@
-﻿using eShop.CoreBusiness.Models;
+using eShop.CoreBusiness.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace eShop.UseCases.PluginInterface.DataStore
         IEnumerable<Order> GetOrder();
         IEnumerable<Order> GetOutStandingOrders();
         IEnumerable<Order> GetProcessedOrder();
-        IEnumerable<Order> GetLineItemByOrderId(int orderId);
+        IEnumerable<OrderLineItem> GetLineItemByOrderId(int orderId);
 
     }
 

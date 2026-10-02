@@ -1,4 +1,4 @@
-﻿using eShop.CoreBusiness.Models;
+using eShop.CoreBusiness.Models;
 using eShop.UseCases.PluginInterface.DataStore;
 using System;
 using System.Collections.Generic;
@@ -61,7 +61,7 @@ namespace eShop.DataStore.HardCoded
             if (ord == null) return;
             orders[order.OrderId.Value] = order;
         }
-        public IEnumerable<Order> GetLineItemByOrderId(int orderId)
+        public IEnumerable<OrderLineItem> GetLineItemByOrderId(int orderId)
         {
             throw new NotImplementedException();
         }

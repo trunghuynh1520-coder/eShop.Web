@@ -1,0 +1,98 @@
+@page "/admin/orders/{OrderId:int}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@inject IViewOrderDetailUseCase ViewOrderDetailUseCase
+@inject IProcessOrderUseCase ProcessOrderUseCase
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Chi tiết Đơn hàng #@OrderId</h3>
+
+@if (order != null)
+{
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Người nhận:</strong> @order.CustomerName</p>
+            <p><strong>Địa chỉ:</strong> @order.CustomerAddress, @order.CustomerCity, @order.CustomerStateProvince</p>
+            <p><strong>Ngày đặt:</strong> @order.DatePlaced?.ToString("dd/MM/yyyy")</p>
+            <p><strong>Trạng thái:</strong> @(order.DateProcessed.HasValue ? $"Đã xử lý vào {order.DateProcessed.Value.ToString("dd/MM/yyyy")} bởi {order.AdminUser}" : "Chờ xử lý")</p>
+        </div>
+    </div>
+
+    <h4>Sản phẩm:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Sản phẩm ID</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(order.LineItems != null)
+            {
+                foreach (var item in order.LineItems)
+                {
+                    <tr>
+                        <td>@item.ProductId</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Price</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    @if (!order.DateProcessed.HasValue)
+    {
+        <button class="btn btn-success" @onclick="ProcessOrderAsync">Duyệt đơn hàng</button>
+    }
+    
+    <button class="btn btn-secondary" @onclick="GoBack">Quay lại</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-2">@errorMessage</div>
+    }
+}
+else
+{
+    <p>Không tìm thấy đơn hàng.</p>
+}
+
+@code {
+    [Parameter]
+    public int OrderId { get; set; }
+
+    private Order? order;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        order = ViewOrderDetailUseCase.Execute(OrderId);
+    }
+
+    private async Task ProcessOrderAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        string adminUser = authState.User.Identity?.Name ?? "UnknownAdmin";
+        
+        bool success = ProcessOrderUseCase.Execute(OrderId, adminUser);
+        if (success)
+        {
+            NavigationManager.NavigateTo("/admin/orders");
+        }
+        else
+        {
+            errorMessage = "Xử lý đơn hàng thất bại. Vui lòng kiểm tra lại.";
+        }
+        
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/admin/orders");
+    }
+}

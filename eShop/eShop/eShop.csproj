@@ -12,7 +12,9 @@
     <ProjectReference Include="..\..\Plugins\eShop.ShoppingCartLocal\eShop.ShoppingCartLocalStorage.csproj" />
     <ProjectReference Include="..\..\Plugins\eShope.DataStore.HardCoded\eShope.DataStore.HardCoded.csproj" />
     <ProjectReference Include="..\..\eShop.Web.Modules\eShop.Web.CustomerPortal\eShop.Web.CustomerPortal.csproj" />
+    <ProjectReference Include="..\..\eShop.Web.Modules\eShop.Web.AdminPortal\eShop.Web.AdminPortal.csproj" />
     <ProjectReference Include="..\Plugins\eShop.StateStore.DI\eShop.StateStore.DI.csproj" />
+    <ProjectReference Include="..\..\Plugins\eShop.Plugins.DataStore.SQL\eShop.Plugins.DataStore.SQL.csproj" />
   </ItemGroup>
 
 </Project>

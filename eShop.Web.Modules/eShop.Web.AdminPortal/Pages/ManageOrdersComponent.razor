@@ -1,0 +1,52 @@
+@page "/admin/orders"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+@inject IViewOrdersUseCase ViewOrdersUseCase
+
+<h3>Quản lý Đơn hàng</h3>
+
+@if (orders != null && orders.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã ĐH</th>
+                <th>Ngày đặt</th>
+                <th>Người nhận</th>
+                <th>Thành phố</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>@order.OrderId</td>
+                    <td>@order.DatePlaced?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@order.CustomerName</td>
+                    <td>@order.CustomerCity</td>
+                    <td>
+                        @(order.DateProcessed.HasValue ? "Đã duyệt" : "Chờ xử lý")
+                    </td>
+                    <td>
+                        <a href="/admin/orders/@order.OrderId" class="btn btn-primary">Xem / Xử lý</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Không có đơn hàng nào.</p>
+}
+
+@code {
+    private IEnumerable<Order>? orders;
+
+    protected override void OnInitialized()
+    {
+        orders = ViewOrdersUseCase.Execute();
+    }
+}
