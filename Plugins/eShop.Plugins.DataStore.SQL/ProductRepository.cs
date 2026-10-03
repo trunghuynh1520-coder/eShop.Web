@@ -20,7 +20,7 @@ namespace eShop.Plugins.DataStore.SQL
         public Product GetProduct(int id)
         {
             using IDbConnection db = new SqlConnection(_connectionString);
-            return db.QueryFirstOrDefault<Product>("SELECT * FROM Product WHERE ProductId = @Id", new { Id = id });
+            return db.QueryFirstOrDefault<Product>("SELECT * FROM Product WHERE Id = @Id", new { Id = id });
         }
 
         public IEnumerable<Product> GetProducts(string filter)
