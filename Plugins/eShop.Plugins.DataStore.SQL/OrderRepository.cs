@@ -24,7 +24,19 @@ namespace eShop.Plugins.DataStore.SQL
             var order = db.QueryFirstOrDefault<Order>("SELECT * FROM [Order] WHERE OrderId = @OrderId", new { OrderId = id });
             if (order != null)
             {
-                order.LineItems = db.Query<OrderLineItem>("SELECT * FROM OrderLineItem WHERE OrderId = @OrderId", new { OrderId = id }).ToList();
+                order.LineItems = db.Query<OrderLineItem, Product, OrderLineItem>(
+                    @"SELECT li.*, p.* 
+                      FROM OrderLineItem li 
+                      INNER JOIN Product p ON li.ProductId = p.Id 
+                      WHERE li.OrderId = @OrderId",
+                    (lineItem, product) =>
+                    {
+                        lineItem.Product = product;
+                        return lineItem;
+                    },
+                    new { OrderId = id },
+                    splitOn: "Id"
+                ).ToList();
             }
             return order;
         }
@@ -35,7 +47,19 @@ namespace eShop.Plugins.DataStore.SQL
             var order = db.QueryFirstOrDefault<Order>("SELECT * FROM [Order] WHERE UniqueId = @UniqueId", new { UniqueId = uniqueId });
             if (order != null)
             {
-                order.LineItems = db.Query<OrderLineItem>("SELECT * FROM OrderLineItem WHERE OrderId = @OrderId", new { OrderId = order.OrderId }).ToList();
+                order.LineItems = db.Query<OrderLineItem, Product, OrderLineItem>(
+                    @"SELECT li.*, p.* 
+                      FROM OrderLineItem li 
+                      INNER JOIN Product p ON li.ProductId = p.Id 
+                      WHERE li.OrderId = @OrderId",
+                    (lineItem, product) =>
+                    {
+                        lineItem.Product = product;
+                        return lineItem;
+                    },
+                    new { OrderId = order.OrderId },
+                    splitOn: "Id"
+                ).ToList();
             }
             return order;
         }
